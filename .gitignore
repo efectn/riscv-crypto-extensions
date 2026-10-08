@@ -1,0 +1,13 @@
+# Simulation and synthesis outputs
+build/
+sim/work/
+sim/*.vcd
+sim/*.fst
+sim/*.log
+*.vvp
+*.vcd
+*.fst
+
+# Editor / OS
+.DS_Store
+.vscode/
