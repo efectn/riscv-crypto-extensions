@@ -52,6 +52,13 @@ package rv32_crypto_pkg;
     SM4KS
   } sm4_operand_e;
 
+  typedef enum logic {
+    AES32DSI,
+    AES32DSMI,
+    AES32ESI,
+    AES32ESMI
+  } aes_operand_e;
+
   typedef enum logic [1:0] {
     IDLE,
     STAGE0,
