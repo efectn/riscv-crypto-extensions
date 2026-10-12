@@ -47,6 +47,11 @@ package rv32_crypto_pkg;
     XPERM8
   } xperm_operand_e;
 
+  typedef enum logic {
+    SM4ED,
+    SM4KS
+  } sm4_operand_e;
+
   typedef enum logic [1:0] {
     IDLE,
     STAGE0,
