@@ -110,7 +110,7 @@ async def bitmap_unit_test_rol(dut):
     
     await reset_values(dut) # Reset the DUT
     
-    test_vectors = generate_test_vectors(10, BitmapOperands.ROL)
+    test_vectors = generate_test_vectors(50, BitmapOperands.ROL)
     
     # Add specific edge case test vectors
     test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=1, expected_result=0xFFFFFFFF)) # ROL with all bits set
@@ -149,3 +149,476 @@ async def bitmap_unit_test_rol(dut):
     await ReadOnly() # wait FF write
     assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
         
+@cocotb.test()
+async def bitmap_unit_test_ror(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.ROR)
+    
+    # Add specific edge case test vectors
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=1,  expected_result=0xFFFFFFFF)) # All bits set
+    test_vectors.append(TestData(rs1=0x00000001, rs2=31, expected_result=0x00000002)) # Single bit set
+    test_vectors.append(TestData(rs1=0xAAAAAAAA, rs2=4,  expected_result=0xAAAAAAAA)) # Alternating bits
+    test_vectors.append(TestData(rs1=0x12345678, rs2=0,  expected_result=0x12345678)) # Zero shift
+    test_vectors.append(TestData(rs1=0x12345678, rs2=32, expected_result=0x12345678)) # Shift by 32
+    test_vectors.append(TestData(rs1=0x12345678, rs2=33, expected_result=0x091A2B3C)) # Shift by 33
+    test_vectors.append(TestData(rs1=0x12345678, rs2=63, expected_result=0x2468ACF0)) # Shift by 63
+    test_vectors.append(TestData(rs1=0x80000000, rs2=1,  expected_result=0x40000000)) # MSB set
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.ROR.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+@cocotb.test()
+async def bitmap_unit_test_andn(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.ANDN)
+    
+    # Add specific edge case test vectors
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0xFFFFFFFF, expected_result=0x00000000)) # ANDN with all bits set
+    test_vectors.append(TestData(rs1=0x00000000, rs2=0xFFFFFFFF, expected_result=0x00000000)) # ANDN with rs1 all bits clear
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0x00000000, expected_result=0xFFFFFFFF)) # ANDN with rs2 all bits clear
+    test_vectors.append(TestData(rs1=0xAAAAAAAA, rs2=0x55555555, expected_result=0xAAAAAAAA)) # ANDN with alternating bits
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.ANDN.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+@cocotb.test()
+async def bitmap_unit_test_orn(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.ORN)
+    
+    # Add specific edge case test vectors
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0xFFFFFFFF, expected_result=0xFFFFFFFF)) # ORN with all bits set
+    test_vectors.append(TestData(rs1=0x00000000, rs2=0xFFFFFFFF, expected_result=0x00000000)) # ORN with rs1 all bits clear
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0x00000000, expected_result=0xFFFFFFFF)) # ORN with rs2 all bits clear
+    test_vectors.append(TestData(rs1=0xAAAAAAAA, rs2=0x55555555, expected_result=0xAAAAAAAA)) # ORN with alternating bits
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.ORN.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+
+@cocotb.test()
+async def bitmap_unit_test_xnor(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.XNOR)
+    
+    # Add specific edge case test vectors
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0xFFFFFFFF, expected_result=0xFFFFFFFF)) # Both all ones
+    test_vectors.append(TestData(rs1=0x00000000, rs2=0xFFFFFFFF, expected_result=0x00000000)) # Zero vs all ones
+    test_vectors.append(TestData(rs1=0xFFFFFFFF, rs2=0x00000000, expected_result=0x00000000)) # All ones vs zero
+    test_vectors.append(TestData(rs1=0xAAAAAAAA, rs2=0x55555555, expected_result=0x00000000)) # Opposite alternating bits
+    test_vectors.append(TestData(rs1=0x00000000, rs2=0x00000000, expected_result=0xFFFFFFFF)) # Both zero
+    test_vectors.append(TestData(rs1=0xAAAAAAAA, rs2=0xAAAAAAAA, expected_result=0xFFFFFFFF)) # Identical operands
+    test_vectors.append(TestData(rs1=0x12345678, rs2=0xFFFFFFFF, expected_result=0x12345678)) # XNOR with all ones
+    test_vectors.append(TestData(rs1=0x12345678, rs2=0x00000000, expected_result=0xEDCBA987)) # XNOR with zero
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.XNOR.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+@cocotb.test()
+async def bitmap_unit_test_pack(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.PACK)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.PACK.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+
+@cocotb.test()
+async def bitmap_unit_test_packh(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.PACKH)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.PACKH.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+@cocotb.test()
+async def bitmap_unit_test_brev8(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.BREV8)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.BREV8.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+
+@cocotb.test()
+async def bitmap_unit_test_rev8(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.REV8)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.REV8.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+
+@cocotb.test()
+async def bitmap_unit_test_zip(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.ZIP)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.ZIP.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+@cocotb.test()
+async def bitmap_unit_test_unzip(dut):
+    clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
+    clk.start()
+    
+    await reset_values(dut) # Reset the DUT
+    
+    test_vectors = generate_test_vectors(50, BitmapOperands.UNZIP)
+    
+    dut.ready_i.value = 1
+    
+    for vector in test_vectors:
+        # wait for falling edge to pass data
+        await FallingEdge(dut.clk_i)
+        
+        dut.valid_i.value = 1
+        dut.op_i.value = int(BitmapOperands.UNZIP.value)
+        dut.rs1_i.value = vector.rs1
+        dut.rs2_i.value = vector.rs2
+        dut.aux_i.value = 0
+        
+        await Timer(1, unit="ns") # wait 1ns to staiblize
+        
+        await RisingEdge(dut.clk_i)
+        await ReadOnly() # wait for FF writing
+        
+        assert dut.valid_o.value == 1, "valid_o should be 1"
+        assert dut.ready_o.value == 1, "ready_o should be 1"
+        assert dut.result_o.value == vector.expected_result, "result is not correct"
+
+    await FallingEdge(dut.clk_i)
+    dut.valid_i.value = 0
+    
+    await RisingEdge(dut.clk_i)
+    await ReadOnly() # wait FF write
+    assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low        
+    
+
+@cocotb.test()
+async def bitmap_unit_test_handshake(dut):
+
+    Clock(dut.clk_i, 10, unit="ns").start()
+    await reset_values(dut)
+
+    # simple one-cycle result checking
+    async def step(valid, ready, op, rs1, rs2,
+                   exp_ready, exp_valid, exp_result=None):
+
+        await FallingEdge(dut.clk_i)
+
+        dut.valid_i.value = valid
+        dut.ready_i.value = ready
+        dut.op_i.value = op
+        dut.rs1_i.value = rs1
+        dut.rs2_i.value = rs2
+        dut.aux_i.value = 0
+
+        await Timer(1, unit="ns")
+
+        # Rising edge öncesi input ready
+        assert int(dut.ready_o.value) == exp_ready
+
+        await RisingEdge(dut.clk_i)
+        await ReadOnly()
+
+        # Rising edge sonrası output
+        assert int(dut.valid_o.value) == exp_valid
+
+        if exp_valid and exp_result is not None:
+            assert int(dut.result_o.value) == exp_result
+
+    A = 0x23456781  # ROL(0x12345678, 4)
+    B = 0x40000000  # ROR(0x80000000, 1)
+    C = 0xFFFFFFFF  # XNOR(0, 0)
+
+    # valid_i = 0, ready_i = 1, no change but ready_o = 1
+    await step(0, 1, BitmapOperands.ROL.value, 0, 0,
+               exp_ready=1, exp_valid=0)
+
+    # valid_i = 1, ready_i = 0, able to get new request as ready_o = 1 and pipeline was empty 
+    await step(1, 0, BitmapOperands.ROL.value, 0x12345678, 4,
+               exp_ready=1, exp_valid=1, exp_result=A)
+
+    # since ready_i is never asserted 1, not able to get new request, but valid_o is still 1 and result is still A
+    for _ in range(3):
+        await step(1, 0, BitmapOperands.ROR.value, 0x80000000, 1,
+                   exp_ready=0, exp_valid=1, exp_result=A)
+
+    # valid_i = 1, ready_i = 1, consume old result and get new result B
+    await step(1, 1, BitmapOperands.ROR.value, 0x80000000, 1,
+               exp_ready=1, exp_valid=1, exp_result=B)
+
+    # valid_i = 0, ready_i = 1, input bubble
+    await step(0, 1, BitmapOperands.ROL.value, 0, 0,
+               exp_ready=1, exp_valid=0)
+
+    # valid_i = 1, ready_i = 0, new request C
+    await step(1, 0, BitmapOperands.XNOR.value, 0, 0,
+               exp_ready=1, exp_valid=1, exp_result=C)
+
+    # valid_i = 0, ready_i = 0, still not consumed
+    for _ in range(3):
+        await step(0, 0, BitmapOperands.ROL.value, 0, 0,
+                   exp_ready=0, exp_valid=1, exp_result=C)
+
+    # valid_i = 0, ready_i = 1, consume C and have empty pipeline
+    await step(0, 1, BitmapOperands.ROL.value, 0, 0,
+               exp_ready=1, exp_valid=0)

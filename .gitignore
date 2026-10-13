@@ -7,6 +7,7 @@ sim/*.log
 *.vvp
 *.vcd
 *.fst
+*.gtkw
 
 # Editor / OS
 .DS_Store
