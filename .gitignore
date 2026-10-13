@@ -11,3 +11,5 @@ sim/*.log
 # Editor / OS
 .DS_Store
 .vscode/
+
+*__pycache__*
