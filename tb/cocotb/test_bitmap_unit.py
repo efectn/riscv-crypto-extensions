@@ -573,13 +573,11 @@ async def bitmap_unit_test_handshake(dut):
 
         await Timer(1, unit="ns")
 
-        # Rising edge öncesi input ready
         assert int(dut.ready_o.value) == exp_ready
 
         await RisingEdge(dut.clk_i)
         await ReadOnly()
 
-        # Rising edge sonrası output
         assert int(dut.valid_o.value) == exp_valid
 
         if exp_valid and exp_result is not None:
