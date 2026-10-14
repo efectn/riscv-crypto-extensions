@@ -27,13 +27,13 @@
 
   always_comb begin
     result_d = 32'd0;
-    idx = 4'd0;
+    idx = 8'd0;
     
     case (op_i[0])
       XPERM4: begin
         for (int i = 0; i < 8; i++) begin
           idx = {4'd0, rs2_i[4*i +: 4]};
-          if (idx > 4'd7) begin
+          if (idx > 8'd7) begin
             result_d[4*i +: 4] = 4'd0;
           end else begin
             result_d[4*i +: 4] = rs1_i[4*idx +: 4];
@@ -43,7 +43,7 @@
       XPERM8: begin
         for (int i = 0; i < 4; i++) begin
           idx = rs2_i[8*i +: 8];
-          if (idx > 4'd3) begin
+          if (idx > 8'd3) begin
             result_d[8*i +: 8] = 8'd0;
           end else begin
             result_d[8*i +: 8] = rs1_i[8*idx +: 8];
