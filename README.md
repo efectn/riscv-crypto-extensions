@@ -25,7 +25,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
     - [x] ShaMing hash unit 
     - [ ] ShaMing crypto unit
     - [x] Xperm unit
-    - [ ] Clmul unit
+    - [x] Clmul unit
     - [x] Bitmap unit
 - [ ] Scalar core integration
     - [ ] Clone CV32E40X core and make it executable under Verilator with simple memory model
