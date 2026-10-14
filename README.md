@@ -23,7 +23,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
     - [ ] AES unit
     - [x] SHA unit
     - [x] ShaMing hash unit 
-    - [ ] ShaMing crypto unit
+    - [x] ShaMing crypto unit
     - [x] Xperm unit
     - [x] Clmul unit
     - [x] Bitmap unit
