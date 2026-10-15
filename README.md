@@ -8,6 +8,27 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
 
 * It is planned to implement some PQC algorithms in the future after finalizing the Zks extension implementation.
 
+## Project Structure
+
+```
+├── rtl/                    # SystemVerilog sources
+│   ├── common/             # Shared packages and helper functions
+│   └── units/              # Crypto units and S-box helpers
+│       ├── misc/           # AES and SM4 helper modules
+│       ├── aes_crypto_unit.sv
+│       ├── bitmap_unit.sv
+│       ├── clmul_unit.sv
+│       ├── nist_hash_unit.sv
+│       ├── shaming_crypto_unit.sv
+│       ├── shaming_hash_unit.sv
+│       └── xperm_unit.sv
+├── tb/
+│   └── cocotb/             # Cocotb unit tests and test helpers
+├── sim/                    # Simulator file lists
+├── Makefile                # Test and waveform commands
+├── LICENSE
+└── README.md
+```
 
 ## To-do List:
 
