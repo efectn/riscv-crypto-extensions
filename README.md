@@ -19,8 +19,8 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
 │       ├── bitmap_unit.sv
 │       ├── clmul_unit.sv
 │       ├── nist_hash_unit.sv
-│       ├── shaming_crypto_unit.sv
-│       ├── shaming_hash_unit.sv
+│       ├── shangmi_crypto_unit.sv
+│       ├── shangmi_hash_unit.sv
 │       └── xperm_unit.sv
 ├── tb/
 │   └── cocotb/             # Cocotb unit tests and test helpers
@@ -35,16 +35,16 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
 - [x] Implement crypto units
     - [x] AES unit
     - [x] SHA unit
-    - [x] ShaMing hash unit 
-    - [x] ShaMing crypto unit
+    - [x] Shangmi hash unit
+    - [x] Shangmi crypto unit
     - [x] Xperm unit
     - [x] Clmul unit
     - [x] Bitmap unit
 - [x] Implement unit tests for each crypto unit
     - [x] AES unit
     - [x] SHA unit
-    - [x] ShaMing hash unit 
-    - [x] ShaMing crypto unit
+    - [x] Shangmi hash unit
+    - [x] Shangmi crypto unit
     - [x] Xperm unit
     - [x] Clmul unit
     - [x] Bitmap unit

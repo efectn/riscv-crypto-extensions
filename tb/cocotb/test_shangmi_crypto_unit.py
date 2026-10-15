@@ -10,7 +10,7 @@ from cocotb.triggers import (
 )
 
 from enum import Enum
-class ShaMingCryptoOperands(Enum):
+class ShangmiCryptoOperands(Enum):
     SM4ED = 0
     SM4KS = 1
     
@@ -47,7 +47,7 @@ def rol32(x: int, n: int):
     return ((x << n) | (x >> (32 - n))) & 0xFFFFFFFF
 
 # Simple golden model for RISC-V Zksed extension instructions
-def golden_shangmi_crypto_unit(rs1: int, rs2: int, bs: int, operand: ShaMingCryptoOperands):
+def golden_shangmi_crypto_unit(rs1: int, rs2: int, bs: int, operand: ShangmiCryptoOperands):
     rs1 &= 0xFFFFFFFF
     rs2 &= 0xFFFFFFFF
     bs &= 0x3
@@ -57,11 +57,11 @@ def golden_shangmi_crypto_unit(rs1: int, rs2: int, bs: int, operand: ShaMingCryp
     sb_in = (rs2 >> shamt) & 0xFF
     x = SM4_SBOX[sb_in]
 
-    if operand == ShaMingCryptoOperands.SM4ED:
+    if operand == ShangmiCryptoOperands.SM4ED:
         y = (x ^ (x << 8) ^ (x << 2) ^
              (x << 18) ^ ((x & 0x3F) << 26) ^
              ((x & 0xC0) << 10))
-    elif operand == ShaMingCryptoOperands.SM4KS:
+    elif operand == ShangmiCryptoOperands.SM4KS:
         y = (x ^ ((x & 0x07) << 29) ^
              ((x & 0xFE) << 7) ^
              ((x & 0x01) << 23) ^
@@ -71,7 +71,7 @@ def golden_shangmi_crypto_unit(rs1: int, rs2: int, bs: int, operand: ShaMingCryp
 
     return (rs1 ^ rol32(y, shamt)) & 0xFFFFFFFF
 
-def generate_test_vectors(num_vectors: int, operand: ShaMingCryptoOperands):
+def generate_test_vectors(num_vectors: int, operand: ShangmiCryptoOperands):
     import random
     random.seed(0x5678_9ABC) # TODO: Make this a parameter
     
@@ -110,13 +110,13 @@ async def reset_values(dut):
     assert int(dut.ready_o.value) == 1, "DUT not ready after reset"
     
 @cocotb.test()
-async def shaming_crypto_unit_test_sm4ed(dut):
+async def shangmi_crypto_unit_test_sm4ed(dut):
     clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
     clk.start()
     
     await reset_values(dut) # Reset the DUT
     
-    test_vectors = generate_test_vectors(50, ShaMingCryptoOperands.SM4ED)
+    test_vectors = generate_test_vectors(50, ShangmiCryptoOperands.SM4ED)
     
     # Add specific edge case test vectors
     test_vectors.append(TestData(rs1=0x00000000, rs2=0x00000000, expected_result=0x5B5BD58E, bs=0)) # Zero input
@@ -131,7 +131,7 @@ async def shaming_crypto_unit_test_sm4ed(dut):
             rs2 = byte << (bs * 8) # sbox input is byte >> (bs * 8) in verilog model, so we just do the inverse here to have all possible sbox inputs
 
             expected = golden_shangmi_crypto_unit(
-                rs1, rs2, bs, ShaMingCryptoOperands.SM4ED
+                rs1, rs2, bs, ShangmiCryptoOperands.SM4ED
             )
 
             test_vectors.append(
@@ -145,7 +145,7 @@ async def shaming_crypto_unit_test_sm4ed(dut):
         await FallingEdge(dut.clk_i)
         
         dut.valid_i.value = 1
-        dut.op_i.value = int(ShaMingCryptoOperands.SM4ED.value)
+        dut.op_i.value = int(ShangmiCryptoOperands.SM4ED.value)
         dut.rs1_i.value = vector.rs1
         dut.rs2_i.value = vector.rs2
         dut.aux_i.value = vector.bs
@@ -178,13 +178,13 @@ async def shaming_crypto_unit_test_sm4ed(dut):
     assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low
 
 @cocotb.test()
-async def shaming_crypto_unit_test_sm4ks(dut):
+async def shangmi_crypto_unit_test_sm4ks(dut):
     clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
     clk.start()
     
     await reset_values(dut) # Reset the DUT
     
-    test_vectors = generate_test_vectors(50, ShaMingCryptoOperands.SM4KS)
+    test_vectors = generate_test_vectors(50, ShangmiCryptoOperands.SM4KS)
     
     # Add specific edge case test vectors
     test_vectors.append(TestData(rs1=0x00000000, rs2=0x00000000, expected_result=0xC01A6BD6, bs=0)) # Zero input
@@ -199,7 +199,7 @@ async def shaming_crypto_unit_test_sm4ks(dut):
             rs2 = byte << (bs * 8) # sbox input is byte >> (bs * 8) in verilog model, so we just do the inverse here to have all possible sbox inputs
 
             expected = golden_shangmi_crypto_unit(
-                rs1, rs2, bs, ShaMingCryptoOperands.SM4KS
+                rs1, rs2, bs, ShangmiCryptoOperands.SM4KS
             )
 
             test_vectors.append(
@@ -213,7 +213,7 @@ async def shaming_crypto_unit_test_sm4ks(dut):
         await FallingEdge(dut.clk_i)
         
         dut.valid_i.value = 1
-        dut.op_i.value = int(ShaMingCryptoOperands.SM4KS.value)
+        dut.op_i.value = int(ShangmiCryptoOperands.SM4KS.value)
         dut.rs1_i.value = vector.rs1
         dut.rs2_i.value = vector.rs2
         dut.aux_i.value = vector.bs
@@ -247,7 +247,7 @@ async def shaming_crypto_unit_test_sm4ks(dut):
     
 
 @cocotb.test()
-async def shaming_crypto_unit_test_handshake(dut):
+async def shangmi_crypto_unit_test_handshake(dut):
     Clock(dut.clk_i, 10, unit="ns").start()
     await reset_values(dut)
 
@@ -281,47 +281,47 @@ async def shaming_crypto_unit_test_handshake(dut):
     C = 0x00000000  # SM4ED(A, 0, bs=0)
 
     # valid_i = 0, ready_i = 1, no change but ready_o = 1
-    await step(0, 1, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+    await step(0, 1, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                exp_ready=1, exp_valid=0)
 
     # valid_i = 1, ready_i = 0, able to get new request as ready_o = 1 and pipeline was empty
-    await step(1, 0, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+    await step(1, 0, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                exp_ready=1, exp_valid=0)
 
     # STAGE0, not able to get new request
-    await step(1, 0, ShaMingCryptoOperands.SM4KS.value, 0, 0x80000000, 3,
+    await step(1, 0, ShangmiCryptoOperands.SM4KS.value, 0, 0x80000000, 3,
                exp_ready=0, exp_valid=0)
 
     # STAGE1, result A becomes valid and new request B is accepted
-    await step(1, 0, ShaMingCryptoOperands.SM4KS.value, 0, 0x80000000, 3,
+    await step(1, 0, ShangmiCryptoOperands.SM4KS.value, 0, 0x80000000, 3,
                exp_ready=1, exp_valid=1, exp_result=A)
 
     # since ready_i is never asserted 1, not able to get new request, but valid_o is still 1 and result is still A
-    await step(0, 0, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+    await step(0, 0, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                exp_ready=0, exp_valid=1, exp_result=A)
 
     for _ in range(3):
-        await step(0, 0, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+        await step(0, 0, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                    exp_ready=0, exp_valid=1, exp_result=A)
 
     # valid_i = 1, ready_i = 1, consume old result and get new result B
-    await step(1, 1, ShaMingCryptoOperands.SM4ED.value, A, 0, 0,
+    await step(1, 1, ShangmiCryptoOperands.SM4ED.value, A, 0, 0,
                exp_ready=1, exp_valid=1, exp_result=B)
 
     # valid_i = 0, ready_i = 0, still not consumed
     for _ in range(3):
-        await step(0, 0, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+        await step(0, 0, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                    exp_ready=0, exp_valid=1, exp_result=B)
 
     # valid_i = 0, ready_i = 1, consume B and produce C
-    await step(0, 1, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+    await step(0, 1, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                exp_ready=1, exp_valid=1, exp_result=C)
 
     # valid_i = 0, ready_i = 0, still not consumed
     for _ in range(3):
-        await step(0, 0, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+        await step(0, 0, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                    exp_ready=0, exp_valid=1, exp_result=C)
 
     # valid_i = 0, ready_i = 1, consume C and have empty pipeline
-    await step(0, 1, ShaMingCryptoOperands.SM4ED.value, 0, 0, 0,
+    await step(0, 1, ShangmiCryptoOperands.SM4ED.value, 0, 0, 0,
                exp_ready=1, exp_valid=0)

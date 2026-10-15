@@ -20,18 +20,18 @@ else ifeq ($(TEST),nist_hash_unit)
   TOPLEVEL := nist_hash_unit
   MODULE := test_nist_hash_unit
   VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/nist_hash_unit.sv
-else ifeq ($(TEST),shaming_hash_unit)
-  TOPLEVEL := shaming_hash_unit
-  MODULE := test_shaming_hash_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/shaming_hash_unit.sv
+else ifeq ($(TEST),shangmi_hash_unit)
+  TOPLEVEL := shangmi_hash_unit
+  MODULE := test_shangmi_hash_unit
+  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/shangmi_hash_unit.sv
 else ifeq ($(TEST),aes_crypto_unit)
   TOPLEVEL := aes_crypto_unit
   MODULE := test_aes_crypto_unit
   VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/aes_mixcolumn.sv $(RTL_DIR)/units/misc/aes_sbox.sv $(RTL_DIR)/units/aes_crypto_unit.sv
-else ifeq ($(TEST),shaming_crypto_unit)
-  TOPLEVEL := shaming_crypto_unit
-  MODULE := test_shaming_crypto_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/sm4_sbox.sv $(RTL_DIR)/units/shaming_crypto_unit.sv
+else ifeq ($(TEST),shangmi_crypto_unit)
+  TOPLEVEL := shangmi_crypto_unit
+  MODULE := test_shangmi_crypto_unit
+  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/sm4_sbox.sv $(RTL_DIR)/units/shangmi_crypto_unit.sv
 else ifeq ($(TEST),clmul_unit)
   TOPLEVEL := clmul_unit
   MODULE := test_clmul_unit
@@ -44,7 +44,7 @@ else
   $(error Unknown test: $(TEST))
 endif
 
-SIM_BUILD := $(BUILD_DIR)/sim_$(TEST)
+SIM_BUILD := $(BUILD_DIR)/sim_$(TEST)$(if $(filter 1,$(WAVES)),_waves)
 COCOTB_RESULTS_FILE := $(BUILD_DIR)/results_$(TEST).xml
 WAVE_FILE := $(WAVE_DIR)/$(TEST).fst
 export PYTHONPATH := $(TB_DIR):$(PYTHONPATH)
@@ -72,7 +72,7 @@ nist-hash:
 	$(MAKE) test TEST=nist_hash_unit
 
 sm3-hash:
-	$(MAKE) test TEST=shaming_hash_unit
+	$(MAKE) test TEST=shangmi_hash_unit
 
 clmul:
 	$(MAKE) test TEST=clmul_unit

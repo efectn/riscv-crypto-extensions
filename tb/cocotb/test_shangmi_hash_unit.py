@@ -10,7 +10,7 @@ from cocotb.triggers import (
 )
 
 from enum import Enum
-class ShaMingHashOperands(Enum):
+class ShangmiHashOperands(Enum):
     SM3P0 = 0
     SM3P1 = 1
     
@@ -26,15 +26,15 @@ def rol32(x: int, n: int):
     n &= 31
     return ((x << n) | (x >> (32 - n))) & 0xFFFFFFFF
 
-def golden_hash_unit(rs1: int, rs2: int, operand: ShaMingHashOperands):
+def golden_hash_unit(rs1: int, rs2: int, operand: ShangmiHashOperands):
     rs1 &= 0xFFFFFFFF
     rs2 &= 0xFFFFFFFF
     rd = 0
 
-    if operand == ShaMingHashOperands.SM3P0:
+    if operand == ShangmiHashOperands.SM3P0:
         rd = rs1 ^ rol32(rs1, 9) ^ rol32(rs1, 17)
 
-    elif operand == ShaMingHashOperands.SM3P1:
+    elif operand == ShangmiHashOperands.SM3P1:
         rd = rs1 ^ rol32(rs1, 15) ^ rol32(rs1, 23)
 
     else:
@@ -42,7 +42,7 @@ def golden_hash_unit(rs1: int, rs2: int, operand: ShaMingHashOperands):
 
     return rd & 0xFFFFFFFF
 
-def generate_test_vectors(num_vectors: int, operand: ShaMingHashOperands):
+def generate_test_vectors(num_vectors: int, operand: ShangmiHashOperands):
     import random
     random.seed(0x5678_9ABC) # TODO: Make this a parameter
     
@@ -73,13 +73,13 @@ async def reset_values(dut):
     assert int(dut.ready_o.value) == 1, "DUT not ready after reset"
     
 @cocotb.test()
-async def shaming_hash_unit_test_sm3p0(dut):
+async def shangmi_hash_unit_test_sm3p0(dut):
     clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
     clk.start()
     
     await reset_values(dut) # Reset the DUT
     
-    test_vectors = generate_test_vectors(50, ShaMingHashOperands.SM3P0)
+    test_vectors = generate_test_vectors(50, ShangmiHashOperands.SM3P0)
     
     # Add specific edge case test vectors
     test_vectors.append(TestData(rs1=0x00000000, rs2=0, expected_result=0x00000000)) # Zero input
@@ -93,7 +93,7 @@ async def shaming_hash_unit_test_sm3p0(dut):
         rs1 = 1 << bit
 
         expected = golden_hash_unit(
-            rs1, 0, ShaMingHashOperands.SM3P0
+            rs1, 0, ShangmiHashOperands.SM3P0
         )
 
         test_vectors.append(
@@ -107,7 +107,7 @@ async def shaming_hash_unit_test_sm3p0(dut):
         await FallingEdge(dut.clk_i)
         
         dut.valid_i.value = 1
-        dut.op_i.value = int(ShaMingHashOperands.SM3P0.value)
+        dut.op_i.value = int(ShangmiHashOperands.SM3P0.value)
         dut.rs1_i.value = vector.rs1
         dut.rs2_i.value = vector.rs2
         dut.aux_i.value = 0
@@ -129,13 +129,13 @@ async def shaming_hash_unit_test_sm3p0(dut):
     assert dut.valid_o.value == 0, "valid_o should be 0" # ensure that valid output is asserted low  
           
 @cocotb.test()
-async def shaming_hash_unit_test_sm3p1(dut):
+async def shangmi_hash_unit_test_sm3p1(dut):
     clk = Clock(dut.clk_i, 10, unit="ns") # 100 MHz clock
     clk.start()
     
     await reset_values(dut) # Reset the DUT
     
-    test_vectors = generate_test_vectors(50, ShaMingHashOperands.SM3P1)
+    test_vectors = generate_test_vectors(50, ShangmiHashOperands.SM3P1)
     
     # Add specific edge case test vectors
     test_vectors.append(TestData(rs1=0x00000000, rs2=0, expected_result=0x00000000)) # Zero input
@@ -149,7 +149,7 @@ async def shaming_hash_unit_test_sm3p1(dut):
         rs1 = 1 << bit
 
         expected = golden_hash_unit(
-            rs1, 0, ShaMingHashOperands.SM3P1
+            rs1, 0, ShangmiHashOperands.SM3P1
         )
 
         test_vectors.append(
@@ -163,7 +163,7 @@ async def shaming_hash_unit_test_sm3p1(dut):
         await FallingEdge(dut.clk_i)
         
         dut.valid_i.value = 1
-        dut.op_i.value = int(ShaMingHashOperands.SM3P1.value)
+        dut.op_i.value = int(ShangmiHashOperands.SM3P1.value)
         dut.rs1_i.value = vector.rs1
         dut.rs2_i.value = vector.rs2
         dut.aux_i.value = 0
@@ -220,35 +220,35 @@ async def hash_unit_test_handshake(dut):
     C = 0x00000000  # SM3P0(0x00000000)
 
     # valid_i = 0, ready_i = 1, no change but ready_o = 1
-    await step(0, 1, ShaMingHashOperands.SM3P0.value, 0, 0,
+    await step(0, 1, ShangmiHashOperands.SM3P0.value, 0, 0,
                exp_ready=1, exp_valid=0)
 
     # valid_i = 1, ready_i = 0, able to get new request as ready_o = 1 and pipeline was empty
-    await step(1, 0, ShaMingHashOperands.SM3P0.value, 0x12345678, 4,
+    await step(1, 0, ShangmiHashOperands.SM3P0.value, 0x12345678, 4,
                exp_ready=1, exp_valid=1, exp_result=A)
 
     # since ready_i is never asserted 1, not able to get new request, but valid_o is still 1 and result is still A
     for _ in range(3):
-        await step(1, 0, ShaMingHashOperands.SM3P1.value, 0x80000000, 1,
+        await step(1, 0, ShangmiHashOperands.SM3P1.value, 0x80000000, 1,
                    exp_ready=0, exp_valid=1, exp_result=A)
 
     # valid_i = 1, ready_i = 1, consume old result and get new result B
-    await step(1, 1, ShaMingHashOperands.SM3P1.value, 0x80000000, 1,
+    await step(1, 1, ShangmiHashOperands.SM3P1.value, 0x80000000, 1,
                exp_ready=1, exp_valid=1, exp_result=B)
 
     # valid_i = 0, ready_i = 1, input bubble
-    await step(0, 1, ShaMingHashOperands.SM3P0.value, 0, 0,
+    await step(0, 1, ShangmiHashOperands.SM3P0.value, 0, 0,
                exp_ready=1, exp_valid=0)
 
     # valid_i = 1, ready_i = 0, new request C
-    await step(1, 0, ShaMingHashOperands.SM3P0.value, 0, 0,
+    await step(1, 0, ShangmiHashOperands.SM3P0.value, 0, 0,
                exp_ready=1, exp_valid=1, exp_result=C)
 
     # valid_i = 0, ready_i = 0, still not consumed
     for _ in range(3):
-        await step(0, 0, ShaMingHashOperands.SM3P0.value, 0, 0,
+        await step(0, 0, ShangmiHashOperands.SM3P0.value, 0, 0,
                    exp_ready=0, exp_valid=1, exp_result=C)
 
     # valid_i = 0, ready_i = 1, consume C and have empty pipeline
-    await step(0, 1, ShaMingHashOperands.SM3P0.value, 0, 0,
+    await step(0, 1, ShangmiHashOperands.SM3P0.value, 0, 0,
                exp_ready=1, exp_valid=0)

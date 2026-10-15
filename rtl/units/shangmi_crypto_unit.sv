@@ -1,4 +1,4 @@
-module shaming_crypto_unit #(
+module shangmi_crypto_unit #(
   parameter int unsigned OP_WIDTH = 8,
   parameter int unsigned AUX_WIDTH = 5
 ) (
