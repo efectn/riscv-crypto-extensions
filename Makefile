@@ -24,6 +24,10 @@ else ifeq ($(TEST),shaming_hash_unit)
   TOPLEVEL := shaming_hash_unit
   MODULE := test_shaming_hash_unit
   VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/shaming_hash_unit.sv
+else ifeq ($(TEST),aes_crypto_unit)
+  TOPLEVEL := aes_crypto_unit
+  MODULE := test_aes_crypto_unit
+  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/aes_mixcolumn.sv $(RTL_DIR)/units/misc/aes_sbox.sv $(RTL_DIR)/units/aes_crypto_unit.sv
 else ifeq ($(TEST),shaming_crypto_unit)
   TOPLEVEL := shaming_crypto_unit
   MODULE := test_shaming_crypto_unit
