@@ -1,0 +1,3 @@
+[submodule "rtl/cv32e40x"]
+	path = rtl/cv32e40x
+	url = https://github.com/openhwfoundation/cv32e40x.git
