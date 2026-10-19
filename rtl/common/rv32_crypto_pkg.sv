@@ -64,4 +64,15 @@ package rv32_crypto_pkg;
     STAGE0,
     STAGE1
   } clmul_fsm_stages_e;
+
+  typedef enum logic [2:0] {
+    BITMAP,
+    CLMUL,
+    XPERM,
+    AES_CRYPTO,
+    SHANGMI_CRYPTO,
+    NIST_HASH,
+    SHANGMI_HASH,
+    INVALID
+  } crypto_decoder_unit_sel_e;
 endpackage
