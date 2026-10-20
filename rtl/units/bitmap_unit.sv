@@ -1,5 +1,5 @@
 module bitmap_unit #(
-  parameter int unsigned OP_WIDTH = 8,
+  parameter int unsigned OP_WIDTH = 4,
   parameter int unsigned AUX_WIDTH = 5
 ) (
   input  logic                 clk_i,

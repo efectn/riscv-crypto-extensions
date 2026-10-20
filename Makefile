@@ -35,38 +35,24 @@ FW_FLAGS := -march=rv32i -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-fno-pic -fno-pie -fno-stack-protector -msmall-data-limit=0 \
 	-ffunction-sections -fdata-sections -Wall -Wextra
 
-# Packages always appear before the unit that imports them.
-ifeq ($(TEST),bitmap_unit)
-  TOPLEVEL := bitmap_unit
-  MODULE := test_bitmap_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/bitmap_unit.sv
-else ifeq ($(TEST),nist_hash_unit)
-  TOPLEVEL := nist_hash_unit
-  MODULE := test_nist_hash_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/nist_hash_unit.sv
-else ifeq ($(TEST),shangmi_hash_unit)
-  TOPLEVEL := shangmi_hash_unit
-  MODULE := test_shangmi_hash_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/shangmi_hash_unit.sv
-else ifeq ($(TEST),aes_crypto_unit)
-  TOPLEVEL := aes_crypto_unit
-  MODULE := test_aes_crypto_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/aes_mixcolumn.sv $(RTL_DIR)/units/misc/aes_sbox.sv $(RTL_DIR)/units/aes_crypto_unit.sv
-else ifeq ($(TEST),shangmi_crypto_unit)
-  TOPLEVEL := shangmi_crypto_unit
-  MODULE := test_shangmi_crypto_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/misc/sm4_sbox.sv $(RTL_DIR)/units/shangmi_crypto_unit.sv
-else ifeq ($(TEST),clmul_unit)
-  TOPLEVEL := clmul_unit
-  MODULE := test_clmul_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/clmul_unit.sv
-else ifeq ($(TEST),xperm_unit)
-  TOPLEVEL := xperm_unit
-  MODULE := test_xperm_unit
-  VERILOG_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv $(RTL_DIR)/units/xperm_unit.sv
-else
-  $(error Unknown test: $(TEST))
+TESTS := bitmap_unit nist_hash_unit shangmi_hash_unit aes_crypto_unit \
+         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder
+
+ifeq ($(filter $(TEST),$(TESTS)),)
+$(error Unknown test: $(TEST))
 endif
+
+TOPLEVEL := $(TEST)
+MODULE := test_$(TEST)
+
+EXTRA_SOURCES_aes_crypto_unit := units/misc/aes_mixcolumn.sv units/misc/aes_sbox.sv
+EXTRA_SOURCES_shangmi_crypto_unit := units/misc/sm4_sbox.sv
+UNIT_SOURCE := $(if $(filter crypto_decoder,$(TEST)),,units/)$(TEST).sv
+
+# Packages always appear before the unit that imports them.
+VERILOG_SOURCES := $(addprefix $(RTL_DIR)/, \
+    common/rv32_crypto_pkg.sv common/rv32_utils_pkg.sv \
+    $(EXTRA_SOURCES_$(TEST)) $(UNIT_SOURCE))
 
 SIM_BUILD := $(BUILD_DIR)/sim_$(TEST)$(if $(filter 1,$(WAVES)),_waves)
 COCOTB_RESULTS_FILE := $(BUILD_DIR)/results_$(TEST).xml
@@ -89,21 +75,6 @@ all: test
 test:
 	@mkdir -p $(BUILD_DIR) $(WAVE_DIR) $(SIM_BUILD)
 	$(MAKE) sim SIM=$(SIM) TOPLEVEL_LANG=$(TOPLEVEL_LANG) TOPLEVEL=$(TOPLEVEL) COCOTB_TEST_MODULES=$(MODULE) VERILOG_SOURCES="$(VERILOG_SOURCES)" SIM_BUILD=$(SIM_BUILD) COCOTB_RESULTS_FILE=$(COCOTB_RESULTS_FILE) EXTRA_ARGS="$(EXTRA_ARGS)" SIM_ARGS="$(SIM_ARGS)"
-
-bitmap:
-	$(MAKE) test TEST=bitmap_unit
-
-nist-hash:
-	$(MAKE) test TEST=nist_hash_unit
-
-sm3-hash:
-	$(MAKE) test TEST=shangmi_hash_unit
-
-clmul:
-	$(MAKE) test TEST=clmul_unit
-
-xperm:
-	$(MAKE) test TEST=xperm_unit
 
 cv32e40x-build:
 	@test -f $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv || { echo "CV32E40X sources missing; run: git submodule update --init --recursive"; exit 1; }
@@ -137,12 +108,6 @@ wave:
 	@if [ -f $(WAVE_FILE) ]; then gtkwave $(WAVE_FILE); else echo "$(WAVE_FILE) not found. Run: make test TEST=$(TEST) WAVES=1"; fi
 
 list:
-	@echo "Available tests:"
-	@echo "  make bitmap"
-	@echo "  make nist-hash"
-	@echo "  make sm3-hash"
-	@echo "  make clmul"
-	@echo "  make xperm"
 	@echo "  make test TEST=bitmap_unit WAVES=1  # generate an FST waveform"
 	@echo "  make cv32e40x-build  # build the CV32E40X C++ simulator"
 	@echo "  make cv32e40x-run VMEM=program.vmem [TRACE=1] [MEM_SIZE=65536] [MAX_CYCLE=1000]"

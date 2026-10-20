@@ -1,5 +1,5 @@
 module crypto_decoder import rv32_crypto_pkg::*; #(
-  parameter int unsigned OP_WIDTH = 8,
+  parameter int unsigned OP_WIDTH = 4,
   parameter int unsigned AUX_WIDTH = 5
 ) (
     input logic [31:0] instr_i,
@@ -106,7 +106,7 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
             endcase
         end else if (opcode == sha256_opcode && funct3 == 3'b001 && funct7 == 7'b0001000) begin
             // SIG and SUM instructions for SHA-256
-            case (rs2_o) begin
+            case (rs2_o)
                 // SHA256SIG0
                 5'b00010: begin
                     unit_sel_o = NIST_HASH;
@@ -137,9 +137,11 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                     unit_sel_o = SHANGMI_HASH;
                     op_o = SM3P1;
                 end
+                default: begin
+                end
             endcase
         end else if (opcode == xperm_opcode && funct7 == xperm_funct7) begin
-            case (funct3) begin
+            case (funct3)
                 // XPERM4
                 3'b010: begin
                     unit_sel_o = XPERM;
@@ -150,23 +152,27 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                     unit_sel_o = XPERM;
                     op_o = XPERM8;
                 end
+                default: begin
+                end
             endcase
         end else if (opcode == clmul_opcode && funct7 == clmul_funct7) begin
-            case (funct3) begin
+            case (funct3)
                 // CLMUL
                 3'b001: begin
                     unit_sel_o = CLMUL;
-                    op_o = CLMUL;
+                    op_o = 4'd0;
                 end
                 // CLMULH
                 3'b011: begin
                     unit_sel_o = CLMUL;
-                    op_o = CLMULH;
+                    op_o = 4'd1;
+                end
+                default: begin
                 end
             endcase
         end else if (opcode == bitmap_opcode_rtype) begin
             if (funct7 == 7'b0110000) begin
-                case (funct3) begin
+                case (funct3)
                     // ROL
                     3'b001: begin
                         unit_sel_o = BITMAP;
@@ -177,9 +183,11 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                         unit_sel_o = BITMAP;
                         op_o = ROR;
                     end
+                    default: begin
+                    end
                 endcase
             end else if (funct7 == 7'b0100000) begin
-                case (funct3) begin
+                case (funct3)
                     3'b111: begin
                         unit_sel_o = BITMAP;
                         op_o = ANDN;
@@ -192,9 +200,11 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                         unit_sel_o = BITMAP;
                         op_o = XNOR;
                     end
+                    default: begin
+                    end
                 endcase
             end else if (funct7 == 7'b0000100) begin
-                case (funct3) begin
+                case (funct3)
                     // PACK
                     3'b100: begin
                         unit_sel_o = BITMAP;
@@ -205,11 +215,13 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                         unit_sel_o = BITMAP;
                         op_o = PACKH;
                     end
+                    default: begin
+                    end
                 endcase
             end    
         end else if (opcode == bitmap_opcode_itype) begin
             if (funct7 == 7'b0110100 && funct3 == 3'b101) begin
-                case (rs2_o) begin
+                case (rs2_o)
                     // BREV8
                     5'b00111: begin
                         unit_sel_o = BITMAP;
@@ -220,9 +232,11 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                         unit_sel_o = BITMAP;
                         op_o = REV8;
                     end
+                    default: begin
+                    end
                 endcase
             end else if (funct7 == 7'b0000100 && rs2_o == 5'b01111) begin
-                case (funct3) begin
+                case (funct3)
                     // ZIP
                     3'b001: begin
                         unit_sel_o = BITMAP;
@@ -232,6 +246,8 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                     3'b101: begin
                         unit_sel_o = BITMAP;
                         op_o = UNZIP;
+                    end
+                    default: begin
                     end
                 endcase
             end else if (funct7 == 7'b0110000 && funct3 == 3'b101) begin

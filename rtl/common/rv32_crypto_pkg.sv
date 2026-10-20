@@ -37,22 +37,22 @@ package rv32_crypto_pkg;
   } nist_operand_e;
 
   // Zksh: SM3 transforms.
-  typedef enum logic {
+  typedef enum logic [3:0] {
     SM3P0,
     SM3P1
   } sm3_operand_e;
 
-  typedef enum logic {
+  typedef enum logic [3:0] {
     XPERM4,
     XPERM8
   } xperm_operand_e;
 
-  typedef enum logic {
+  typedef enum logic [3:0] {
     SM4ED,
     SM4KS
   } sm4_operand_e;
 
-  typedef enum logic [1:0] {
+  typedef enum logic [3:0] {
     AES32DSI,
     AES32DSMI,
     AES32ESI,
