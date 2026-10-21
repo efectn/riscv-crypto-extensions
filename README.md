@@ -53,8 +53,8 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
     - [ ] Investigate XIF interface and implement it with simple dummy interface
     - [x] Create decoder unit for crypto co-processor
         - [x] Create tests including both valid and invalid instructions for the decoder unit
-    - [ ] **Create datapath including all the subunits**
-        - [ ] Test datapath with mock signals.
+    - [x] Create datapath including all the subunits
+        - [ ] **Test datapath with mock signals.**
     - [ ] Implement controller unit for crypto co-processor
         - [ ] **Imlement it as simple FSM like IDLE -> WAIT_COMMIT -> DISPATCH -> RUN states with only one outstanding instruction at a time**
         - [ ] Improve controller to support multiple outstanding instructions by adding FIFO, scoreboard etc.
@@ -64,3 +64,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
         - [ ] Connect it to real XIF interface and test it with real signals using the CV32E40X core
     - [ ] Improve XIF connection to core and memory model
 - [ ] Integration tests
+- [ ] FPGA synthesis and implementation
+    - [ ] Check critical paths and timing constraints for crypto co-processor and improve them if necessary
+    - [ ] Perhaps convert SBOXes to BRAMs to reduce area
+    - [ ] Add Zkr unit and implement it in FPGA using ring oscillator and other primitives
