@@ -36,7 +36,7 @@ FW_FLAGS := -march=rv32i -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-ffunction-sections -fdata-sections -Wall -Wextra
 
 TESTS := bitmap_unit nist_hash_unit shangmi_hash_unit aes_crypto_unit \
-         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder
+         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder datapath
 
 ifeq ($(filter $(TEST),$(TESTS)),)
 $(error Unknown test: $(TEST))
@@ -45,6 +45,13 @@ endif
 TOPLEVEL := $(TEST)
 MODULE := test_$(TEST)
 
+ifeq ($(TEST),datapath)
+TOPLEVEL := crypto_datapath
+VERILOG_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv \
+    $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv \
+    $(wildcard $(RTL_DIR)/units/misc/*.sv) $(wildcard $(RTL_DIR)/units/*.sv) \
+    $(RTL_DIR)/crypto_datapath.sv
+else
 EXTRA_SOURCES_aes_crypto_unit := units/misc/aes_mixcolumn.sv units/misc/aes_sbox.sv
 EXTRA_SOURCES_shangmi_crypto_unit := units/misc/sm4_sbox.sv
 UNIT_SOURCE := $(if $(filter crypto_decoder,$(TEST)),,units/)$(TEST).sv
@@ -53,6 +60,7 @@ UNIT_SOURCE := $(if $(filter crypto_decoder,$(TEST)),,units/)$(TEST).sv
 VERILOG_SOURCES := $(addprefix $(RTL_DIR)/, \
     common/rv32_crypto_pkg.sv common/rv32_utils_pkg.sv \
     $(EXTRA_SOURCES_$(TEST)) $(UNIT_SOURCE))
+endif
 
 SIM_BUILD := $(BUILD_DIR)/sim_$(TEST)$(if $(filter 1,$(WAVES)),_waves)
 COCOTB_RESULTS_FILE := $(BUILD_DIR)/results_$(TEST).xml
@@ -108,6 +116,7 @@ wave:
 	@if [ -f $(WAVE_FILE) ]; then gtkwave $(WAVE_FILE); else echo "$(WAVE_FILE) not found. Run: make test TEST=$(TEST) WAVES=1"; fi
 
 list:
+	@echo "  make test TEST=datapath  # run the cocotb datapath test"
 	@echo "  make test TEST=bitmap_unit WAVES=1  # generate an FST waveform"
 	@echo "  make cv32e40x-build  # build the CV32E40X C++ simulator"
 	@echo "  make cv32e40x-run VMEM=program.vmem [TRACE=1] [MEM_SIZE=65536] [MAX_CYCLE=1000]"

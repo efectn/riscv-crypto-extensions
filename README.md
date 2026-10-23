@@ -54,7 +54,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
     - [x] Create decoder unit for crypto co-processor
         - [x] Create tests including both valid and invalid instructions for the decoder unit
     - [x] Create datapath including all the subunits
-        - [ ] **Test datapath with mock signals.**
+        - [x] Test datapath with mock signals.
     - [ ] Implement controller unit for crypto co-processor
         - [ ] **Imlement it as simple FSM like IDLE -> WAIT_COMMIT -> DISPATCH -> RUN states with only one outstanding instruction at a time**
         - [ ] Improve controller to support multiple outstanding instructions by adding FIFO, scoreboard etc.

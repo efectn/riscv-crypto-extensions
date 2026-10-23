@@ -30,7 +30,7 @@ module shangmi_hash_unit #(
   always_comb begin
     result_d = 32'd0;
     
-    case (op_i[0])
+    case (op_i)
       SM3P0: result_d = rs1_i ^ rol(rs1_i, 5'd9) ^ rol(rs1_i, 5'd17);
       SM3P1: result_d = rs1_i ^ rol(rs1_i, 5'd15) ^ rol(rs1_i, 5'd23);
       default: result_d = 32'd0;

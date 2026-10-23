@@ -20,7 +20,7 @@ module aes_crypto_unit #(
   import rv32_crypto_pkg::*;
 
   // Buffer some inputs and middle values for FSM logic
-  logic [1:0] op_q;
+  logic [OP_WIDTH-1:0] op_q;
   logic [31:0] rs1_q;
   logic [31:0] rs2_q;
   logic [AUX_WIDTH-1:0] aux_q;
@@ -94,7 +94,7 @@ module aes_crypto_unit #(
       rs1_q <= 32'd0;
       rs2_q <= 32'd0;
       aux_q <= 5'd0;
-      op_q <= 2'b0;
+      op_q <= 4'b0;
       stage0_q <= 32'd0;
     end else begin
       // consume the result if it is ready
@@ -105,7 +105,7 @@ module aes_crypto_unit #(
         IDLE: begin
           // if we are ready to get new request, set buffered values
           if (ready_o && valid_i) begin
-            op_q <= op_i[1:0];
+            op_q <= op_i;
             rs1_q <= rs1_i;
             rs2_q <= rs2_i;
             aux_q <= aux_i;
@@ -124,7 +124,7 @@ module aes_crypto_unit #(
 
             // get new request if it is valid
             if (valid_i) begin
-              op_q <= op_i[1:0];
+              op_q <= op_i;
               rs1_q <= rs1_i;
               rs2_q <= rs2_i;
               aux_q <= aux_i;

@@ -4,7 +4,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
   parameter int unsigned X_ID_WIDTH = 4,
   parameter int unsigned UNIT_NUM = 7
 ) (
-    input logic clk,
+    input logic clk_i,
     input logic rst_ni,
 
     input logic [31:0] rs1_i,
@@ -36,7 +36,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     logic [UNIT_NUM-1:0] unit_readies;
     
     // load inputs into the registers when load_instruction_i asserted high
-    always_ff @(posedge clk or negedge rst_ni) begin
+    always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
             rs1_q <= 32'd0;
             rs2_q <= 32'd0;
@@ -74,7 +74,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) bitmap_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[0] & start_unit_i & unit_readies[0]),
         .ready_o(unit_readies[0]),
@@ -90,8 +90,8 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     clmul_unit #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
-    ) aes_unit (
-        .clk_i(clk),
+    ) clmul_unit (
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[1] & start_unit_i & unit_readies[1]),
         .ready_o(unit_readies[1]),
@@ -108,7 +108,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) xperm_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[2] & start_unit_i & unit_readies[2]),
         .ready_o(unit_readies[2]),
@@ -125,7 +125,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) aes_crypto_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[3] & start_unit_i & unit_readies[3]),
         .ready_o(unit_readies[3]),
@@ -142,7 +142,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) shangmi_crypto_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[4] & start_unit_i & unit_readies[4]),
         .ready_o(unit_readies[4]),
@@ -159,7 +159,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) nist_hash_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[5] & start_unit_i & unit_readies[5]),
         .ready_o(unit_readies[5]),
@@ -176,7 +176,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .OP_WIDTH(OP_WIDTH),
         .AUX_WIDTH(AUX_WIDTH)
     ) shangmi_hash_unit (
-        .clk_i(clk),
+        .clk_i(clk_i),
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[6] & start_unit_i & unit_readies[6]),
         .ready_o(unit_readies[6]),

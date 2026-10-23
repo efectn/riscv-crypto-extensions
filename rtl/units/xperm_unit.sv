@@ -29,7 +29,7 @@
     result_d = 32'd0;
     idx = 8'd0;
     
-    case (op_i[0])
+    case (op_i)
       XPERM4: begin
         for (int i = 0; i < 8; i++) begin
           idx = {4'd0, rs2_i[4*i +: 4]};
