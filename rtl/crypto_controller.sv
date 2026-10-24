@@ -1,4 +1,4 @@
-module crypto_controller import cv32e40x_pkg::*; #(
+module crypto_controller import cv32e40x_pkg::*; import rv32_crypto_pkg::*; #(
   parameter int unsigned OP_WIDTH = 4,
   parameter int unsigned AUX_WIDTH = 5,
   parameter int unsigned X_ID_WIDTH = 4,
@@ -38,21 +38,15 @@ module crypto_controller import cv32e40x_pkg::*; #(
     output logic consumer_ready_o, // to datapath
     output logic operands_from_inputs_o // to datapath
 );
-    typedef enum logic [1:0] {
-        IDLE,
-        WAIT_COMMIT,
-        RUN
-    } state_t;
-
-    state_t state_q;
-    state_t state_d;
+    logic [1:0] state_q;
+    logic [1:0] state_d;
 
     logic [X_ID_WIDTH-1:0] issue_id_q;
     logic [4:0] result_rd_q; 
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
-            state_q <= IDLE;
+            state_q <= CONTROLLER_IDLE;
             result_rd_q <= 5'd0;
             issue_id_q <= 4'd0;
         end else begin
@@ -79,17 +73,18 @@ module crypto_controller import cv32e40x_pkg::*; #(
         result_rd_o    = '0;
         
         case (state_q)
-            IDLE: begin
+            CONTROLLER_IDLE: begin
                 if (issue_valid_i && !decoder_illegal_i) begin
                     if (commit_valid_i && !commit_kill_i && commit_id_i == issue_id_i) begin
-                        state_d = RUN;
+                        state_d = CONTROLLER_RUN;
                         start_unit_o = 1'b1;
                         operands_from_inputs_o = 1'b1;
+                        load_instruction_o = 1'b1;
                     end else if (commit_valid_i && commit_kill_i && commit_id_i == issue_id_i) begin
-                        state_d = IDLE;
+                        state_d = CONTROLLER_IDLE;
                     end else begin
                         load_instruction_o = 1'b1;
-                        state_d = WAIT_COMMIT;
+                        state_d = CONTROLLER_WAIT_COMMIT;
                     end
 
                     issue_accept_o = 1'b1;
@@ -97,31 +92,32 @@ module crypto_controller import cv32e40x_pkg::*; #(
                 end
             end
 
-            WAIT_COMMIT: begin
+            CONTROLLER_WAIT_COMMIT: begin
                 if (commit_valid_i && commit_id_i == issue_id_q && !commit_kill_i) begin
-                    state_d = RUN;
+                    state_d = CONTROLLER_RUN;
                     start_unit_o = 1'b1;
                 end else if (commit_valid_i && commit_id_i == issue_id_q && commit_kill_i) begin
-                    state_d = IDLE;
+                    state_d = CONTROLLER_IDLE;
                 end
             end
 
-            RUN: begin
+            CONTROLLER_RUN: begin
                 start_unit_o = 1'b0;
                 result_valid_o = result_valid_i; // directly get it from datapath
-                consumer_ready_o = result_ready_i; // 
+                consumer_ready_o = result_ready_i; // from top cv32e40x_pkg
                 result_rd_o = result_rd_q;
                 result_we_o = 1'b1;
 
                 if (result_valid_i && result_ready_i) begin
-                    state_d = IDLE;
-
-                    result_valid_o = 1'b1;
-                    result_we_o = 1'b1;
+                    state_d = CONTROLLER_IDLE;
                 end
+            end
+
+            default: begin
+                state_d = CONTROLLER_IDLE;
             end
         endcase
     end
 
-    assign issue_ready_o = (state_q == IDLE) && rst_ni;
+    assign issue_ready_o = (state_q == CONTROLLER_IDLE) && rst_ni;
 endmodule

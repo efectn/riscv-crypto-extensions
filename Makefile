@@ -36,7 +36,7 @@ FW_FLAGS := -march=rv32i -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-ffunction-sections -fdata-sections -Wall -Wextra
 
 TESTS := bitmap_unit nist_hash_unit shangmi_hash_unit aes_crypto_unit \
-         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder datapath
+         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder datapath controller
 
 ifeq ($(filter $(TEST),$(TESTS)),)
 $(error Unknown test: $(TEST))
@@ -51,6 +51,11 @@ VERILOG_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv \
     $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv \
     $(wildcard $(RTL_DIR)/units/misc/*.sv) $(wildcard $(RTL_DIR)/units/*.sv) \
     $(RTL_DIR)/crypto_datapath.sv
+else ifeq ($(TEST),controller)
+TOPLEVEL := crypto_controller
+VERILOG_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv \
+	$(RTL_DIR)/common/rv32_crypto_pkg.sv \
+    $(RTL_DIR)/crypto_controller.sv
 else
 EXTRA_SOURCES_aes_crypto_unit := units/misc/aes_mixcolumn.sv units/misc/aes_sbox.sv
 EXTRA_SOURCES_shangmi_crypto_unit := units/misc/sm4_sbox.sv
@@ -117,6 +122,7 @@ wave:
 
 list:
 	@echo "  make test TEST=datapath  # run the cocotb datapath test"
+	@echo "  make test TEST=controller  # run the cocotb controller test"
 	@echo "  make test TEST=bitmap_unit WAVES=1  # generate an FST waveform"
 	@echo "  make cv32e40x-build  # build the CV32E40X C++ simulator"
 	@echo "  make cv32e40x-run VMEM=program.vmem [TRACE=1] [MEM_SIZE=65536] [MAX_CYCLE=1000]"

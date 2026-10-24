@@ -75,4 +75,10 @@ package rv32_crypto_pkg;
     SHANGMI_HASH,
     INVALID
   } crypto_decoder_unit_sel_e;
+
+  typedef enum logic [1:0] {
+    CONTROLLER_IDLE,
+    CONTROLLER_WAIT_COMMIT,
+    CONTROLLER_RUN
+  } controller_state_t;
 endpackage
