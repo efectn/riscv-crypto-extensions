@@ -9,7 +9,8 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
     output logic [AUX_WIDTH-1:0] aux_o,
     output logic [OP_WIDTH-1:0] op_o,
     output crypto_decoder_unit_sel_e unit_sel_o,
-    output logic is_illegal_o
+    output logic is_illegal_o,
+    output logic is_rori_o
 );
     localparam aes_opcode = 7'b0110011;
     localparam sha256_opcode = 7'b0010011;
@@ -31,6 +32,7 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
         unit_sel_o = INVALID;
         op_o = '0;
         aux_o = '0;
+        is_rori_o = 1'b0;
         
         // AES unit selection
         if (opcode == aes_opcode && funct3 == 3'b000) begin
@@ -254,6 +256,7 @@ module crypto_decoder import rv32_crypto_pkg::*; #(
                 // RORI
                 unit_sel_o = BITMAP;
                 op_o = RORI;
+                is_rori_o = 1'b1;
             end
         end
     end

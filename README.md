@@ -55,16 +55,38 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
         - [x] Create tests including both valid and invalid instructions for the decoder unit
     - [x] Create datapath including all the subunits
         - [x] Test datapath with mock signals.
-    - [ ] Implement controller unit for crypto co-processor
+    - [x] Implement controller unit for crypto co-processor
         - [x] Imlement it as simple FSM like IDLE -> WAIT_COMMIT -> DISPATCH -> RUN states with only one outstanding instruction at a time
-        - [ ] Improve controller to support multiple outstanding instructions by adding FIFO, scoreboard etc.
         - [x] Test controller with mock signals
-    - [ ] **Integrate decoder, datapath and controller units to create a complete crypto co-processor**
+    - [x] Integrate decoder, datapath and controller units to create a complete crypto co-processor
         - [ ] **Test crypto co-processor with mock signals.**
         - [ ] Connect it to real XIF interface and test it with real signals using the CV32E40X core
     - [ ] Improve XIF connection to core and memory model
-- [ ] Integration tests
+- [ ] Integration tests and benchmarks
+    - [ ] Testing
+        - [ ] Check https://github.com/riscv/riscv-crypto/blob/main/tests/compliance/test-plan-scalar.adoc plan and implement the tests for crypto co-processor
+        - [ ] Derive crypto tests from https://github.com/riscv/riscv-arch-test/tree/act4/tests/rv32i and run Verilator model aganist the golden-reference Spike simulator
+    - [ ] Benchmarking
+        - [ ] Instruction level benchmarks for each crypto instruction
+            - [ ] Measure single-instruction latency and throughput for each crypto instruction
+            - [ ] Benchmark them with chained and (in)dependent instructions
+            - [ ] Some benchmarks to demostrate XIF, contreoller and datapath performance maybe?
+        - [ ] Add algorithm benchmarks from https://github.com/riscv/riscv-crypto/tree/main/benchmarks
+        - [ ] Real-world benchmarks
+            - [ ] Embench-IoT benchmarks, focusing on crypto workloads
+            - [ ] MBed TLS
+            - [ ] SecureMark-V2
+            - [ ] wolfSSL/wolfCrypt/wolfBoot and other wolf applications
+            - [ ] BearSSL
+            - [ ] MCUboot
 - [ ] FPGA synthesis and implementation
     - [ ] Check critical paths and timing constraints for crypto co-processor and improve them if necessary
     - [ ] Perhaps convert SBOXes to BRAMs to reduce area
     - [ ] Add Zkr unit and implement it in FPGA using ring oscillator and other primitives
+- [ ] CVA6 core support
+    - [ ] Add support for CVA6 core as RV32 and test it with sim_model
+    - [ ] Check 64 bits configuration
+        - [ ] Add XLEN parameter to existing units and test them with 64 bits configuration
+        - [ ] Add support for 64 bits crypto instructions
+    - [ ] Improve controller to support multiple outstanding instructions by adding FIFO, scoreboard etc.
+    - [ ] Check CVA6 FPGA synthesis for both RV32 and RV64 configurations

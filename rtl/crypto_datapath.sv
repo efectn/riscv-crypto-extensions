@@ -17,6 +17,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     input logic load_instruction_i,
     input logic start_unit_i,
     input logic consumer_ready_i,
+    input logic operands_from_inputs_i,
 
     output logic [31:0] result_o,
     output logic [X_ID_WIDTH-1:0] x_id_o,
@@ -34,6 +35,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     logic [31:0] unit_results [UNIT_NUM-1:0];
     logic [UNIT_NUM-1:0] unit_valids;
     logic [UNIT_NUM-1:0] unit_readies;
+
+    logic [31:0] rs1_mux;
+    logic [31:0] rs2_mux;
+    logic [AUX_WIDTH-1:0] aux_mux;
+    logic [OP_WIDTH-1:0] op_mux;
+    logic [UNIT_NUM-1:0] unit_sel_mux;
     
     // load inputs into the registers when load_instruction_i asserted high
     always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -53,6 +60,23 @@ module crypto_datapath import cv32e40x_pkg::*; #(
                 x_id_q <= x_id_i;
                 unit_sel_q <= unit_sel_i;
             end
+        end
+    end
+
+    // operands MUX
+    always_comb begin
+        if (operands_from_inputs_i) begin
+            rs1_mux = rs1_i;
+            rs2_mux = rs2_i;
+            aux_mux = aux_i;
+            op_mux = op_i;
+            unit_sel_mux = unit_sel_i;
+        end else begin
+            rs1_mux = rs1_q;
+            rs2_mux = rs2_q;
+            aux_mux = aux_q;
+            op_mux = op_q;
+            unit_sel_mux = unit_sel_q;
         end
     end
 
@@ -78,12 +102,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[0] & start_unit_i & unit_readies[0]),
         .ready_o(unit_readies[0]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[0]),
-        .ready_i(consumer_ready_i & unit_sel_q[0] & unit_valids[0]),
+        .ready_i(consumer_ready_i & unit_sel_mux[0] & unit_valids[0]),
         .result_o(unit_results[0])
     );
 
@@ -95,12 +119,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[1] & start_unit_i & unit_readies[1]),
         .ready_o(unit_readies[1]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[1]),
-        .ready_i(consumer_ready_i & unit_sel_q[1] & unit_valids[1]),
+        .ready_i(consumer_ready_i & unit_sel_mux[1] & unit_valids[1]),
         .result_o(unit_results[1])
     );
 
@@ -112,12 +136,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[2] & start_unit_i & unit_readies[2]),
         .ready_o(unit_readies[2]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[2]),
-        .ready_i(consumer_ready_i & unit_sel_q[2] & unit_valids[2]),
+        .ready_i(consumer_ready_i & unit_sel_mux[2] & unit_valids[2]),
         .result_o(unit_results[2])
     );
 
@@ -129,12 +153,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[3] & start_unit_i & unit_readies[3]),
         .ready_o(unit_readies[3]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[3]),
-        .ready_i(consumer_ready_i & unit_sel_q[3] & unit_valids[3]),
+        .ready_i(consumer_ready_i & unit_sel_mux[3] & unit_valids[3]),
         .result_o(unit_results[3])
     );
 
@@ -146,12 +170,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[4] & start_unit_i & unit_readies[4]),
         .ready_o(unit_readies[4]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[4]),
-        .ready_i(consumer_ready_i & unit_sel_q[4] & unit_valids[4]),
+        .ready_i(consumer_ready_i & unit_sel_mux[4] & unit_valids[4]),
         .result_o(unit_results[4])
     );
 
@@ -163,12 +187,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[5] & start_unit_i & unit_readies[5]),
         .ready_o(unit_readies[5]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[5]),
-        .ready_i(consumer_ready_i & unit_sel_q[5] & unit_valids[5]),
+        .ready_i(consumer_ready_i & unit_sel_mux[5] & unit_valids[5]),
         .result_o(unit_results[5])
     );
 
@@ -180,12 +204,12 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .rst_ni(rst_ni),
         .valid_i(unit_sel_q[6] & start_unit_i & unit_readies[6]),
         .ready_o(unit_readies[6]),
-        .op_i(op_q),
-        .rs1_i(rs1_q),
-        .rs2_i(rs2_q),
-        .aux_i(aux_q),
+        .op_i(op_mux),
+        .rs1_i(rs1_mux),
+        .rs2_i(rs2_mux),
+        .aux_i(aux_mux),
         .valid_o(unit_valids[6]),
-        .ready_i(consumer_ready_i & unit_sel_q[6] & unit_valids[6]),
+        .ready_i(consumer_ready_i & unit_sel_mux[6] & unit_valids[6]),
         .result_o(unit_results[6])
     );
 
