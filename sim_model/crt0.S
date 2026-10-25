@@ -35,7 +35,7 @@ _start:
 _trap:
     // report an unexpected synchronous exception as failure
     li t0, 0x10000000
-    li t1, 1
+    li t1, 100
     sw t1, 0(t0)
 4:
     j 4b

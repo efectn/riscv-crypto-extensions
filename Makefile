@@ -18,6 +18,10 @@ CV32_INTERFACES := $(CV32_DIR)/rtl/cv32e40x_if_c_obi.sv $(CV32_DIR)/rtl/cv32e40x
 CV32_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv $(CV32_INTERFACES) \
 	$(filter-out $(CV32_INTERFACES),$(wildcard $(CV32_DIR)/rtl/*.sv)) \
 	$(CV32_DIR)/bhv/cv32e40x_sim_clock_gate.sv
+CRYPTO_SOURCES := $(RTL_DIR)/common/rv32_crypto_pkg.sv $(RTL_DIR)/common/rv32_utils_pkg.sv \
+	$(wildcard $(RTL_DIR)/units/misc/*.sv) $(wildcard $(RTL_DIR)/units/*.sv) \
+	$(RTL_DIR)/crypto_decoder.sv $(RTL_DIR)/crypto_controller.sv \
+	$(RTL_DIR)/crypto_datapath.sv $(RTL_DIR)/crypto_coprocessor.sv
 VMEM ?=
 MEM_SIZE ?= 65536
 MAX_CYCLE ?= 10000
@@ -31,7 +35,8 @@ FW_BUILD := $(BUILD_DIR)/firmware
 FW_NAME := $(basename $(notdir $(APP)))
 FW_ELF := $(FW_BUILD)/$(FW_NAME).elf
 FW_VMEM := $(FW_BUILD)/$(FW_NAME).vmem
-FW_FLAGS := -march=rv32i -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
+FW_ARCH ?= rv32i_zbkb_zbkc_zbkx_zknd_zkne_zknh_zksed_zksh
+FW_FLAGS := -march=$(FW_ARCH) -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-fno-pic -fno-pie -fno-stack-protector -msmall-data-limit=0 \
 	-ffunction-sections -fdata-sections -Wall -Wextra
 
@@ -109,7 +114,7 @@ cv32e40x-build:
 	@test -f $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv || { echo "CV32E40X sources missing; run: git submodule update --init --recursive"; exit 1; }
 	$(SIM) --cc --exe --build -j $(VERILATOR_JOBS) --trace -Wno-fatal \
 		--top-module cv32e40x_top --Mdir $(CV32_BUILD) \
-		$(CV32_SOURCES) $(RTL_DIR)/cv32e40x_top.sv $(PWD)/sim_model/main.cpp
+		$(CV32_SOURCES) $(CRYPTO_SOURCES) $(RTL_DIR)/cv32e40x_top.sv $(PWD)/sim_model/main.cpp
 
 cv32e40x-run:
 	@test -n "$(VMEM)" || { echo "Specify a program: make cv32e40x-run VMEM=path/to/program.vmem"; exit 1; }

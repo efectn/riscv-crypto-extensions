@@ -33,7 +33,7 @@ module cv32e40x_top import cv32e40x_pkg::*; (
         .A_EXT                      (       A_NONE ),
         .B_EXT                      (       B_NONE ),
         .M_EXT                      (       M_NONE ),
-        .X_EXT                      (            0 ),
+        .X_EXT                      (            1 ),
         .DEBUG                      (            0 ), // TODO: Not sure about how to deal and use debugging sport. It might be useful or not?
         .DBG_NUM_TRIGGERS           (            0 ),
         .NUM_MHPMCOUNTERS           (            1 ),
@@ -119,13 +119,48 @@ module cv32e40x_top import cv32e40x_pkg::*; (
         .wu_wfe_i                 (1'b0)
     );
 
-    // Set all XIF signals to zero, as we will not have XIF for a while.
+    crypto_coprocessor crypto_coprocessor_i (
+        .clk_i(clk_i),
+        .rst_ni(rst_ni),
+
+        // XIF issue interface
+        .issue_valid_i(xif.issue_valid),
+        .issue_id_i(xif.issue_req.id),
+        .issue_instr_i(xif.issue_req.instr),
+        .issue_rs1_i(xif.issue_req.rs[0]),
+        .issue_rs2_i(xif.issue_req.rs[1]),
+        .issue_ready_o(xif.issue_ready),
+        .issue_accept_o(xif.issue_resp.accept),
+        .issue_writeback_o(xif.issue_resp.writeback),
+
+        // XIF commit interface
+        .commit_valid_i(xif.commit_valid),
+        .commit_id_i(xif.commit.id),
+        .commit_kill_i(xif.commit.commit_kill),
+
+        // XIF result interface
+        .result_ready_i(xif.result_ready),
+        .result_valid_o(xif.result_valid),
+        .result_rd_o(xif.result.rd),
+        .result_we_o(xif.result.we),
+        .result_id_o(xif.result.id),
+        .result_data_o(xif.result.data)
+    );
+
+    // Set unnecessary XIF signals to zero
     assign xif.compressed_ready = 1'b0;
     assign xif.compressed_resp  = '0;
-    assign xif.issue_ready      = 1'b0;
-    assign xif.issue_resp       = '0;
     assign xif.mem_valid        = 1'b0;
     assign xif.mem_req          = '0;
-    assign xif.result_valid     = 1'b0;
-    assign xif.result           = '0;
+    assign xif.issue_resp.dualwrite = 1'b0;
+    assign xif.issue_resp.dualread  = '0;
+    assign xif.issue_resp.loadstore = 1'b0;
+    assign xif.issue_resp.ecswrite  = 1'b0;
+    assign xif.issue_resp.exc       = 1'b0;
+    assign xif.result.ecsdata = '0;
+    assign xif.result.ecswe   = '0;
+    assign xif.result.exc     = 1'b0;
+    assign xif.result.exccode = '0;
+    assign xif.result.err     = 1'b0;
+    assign xif.result.dbg     = 1'b0;
 endmodule

@@ -48,7 +48,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
     - [x] Xperm unit
     - [x] Clmul unit
     - [x] Bitmap unit
-- [ ] Scalar core integration
+- [x] Scalar core integration
     - [x] Clone CV32E40X core and make it executable under Verilator with simple memory model
     - [x] Investigate XIF interface and implement it with simple dummy interface
     - [x] Create decoder unit for crypto co-processor
@@ -60,7 +60,7 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
         - [x] Test controller with mock signals
     - [x] Integrate decoder, datapath and controller units to create a complete crypto co-processor
         - [x] Test crypto co-processor with mock signals.
-        - [ ] Connect it to real XIF interface and test it with real signals using the CV32E40X core
+        - [x] Connect it to real XIF interface and test it with real signals using the CV32E40X core
     - [ ] Improve XIF connection to core and memory model
 - [ ] Integration tests and benchmarks
     - [ ] Testing
