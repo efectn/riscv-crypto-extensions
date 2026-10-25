@@ -36,7 +36,7 @@ FW_FLAGS := -march=rv32i -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-ffunction-sections -fdata-sections -Wall -Wextra
 
 TESTS := bitmap_unit nist_hash_unit shangmi_hash_unit aes_crypto_unit \
-         shangmi_crypto_unit clmul_unit xperm_unit crypto_decoder datapath controller
+         shangmi_crypto_unit clmul_unit xperm_unit decoder datapath controller coprocessor
 
 ifeq ($(filter $(TEST),$(TESTS)),)
 $(error Unknown test: $(TEST))
@@ -56,10 +56,26 @@ TOPLEVEL := crypto_controller
 VERILOG_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv \
 	$(RTL_DIR)/common/rv32_crypto_pkg.sv \
     $(RTL_DIR)/crypto_controller.sv
+else ifeq ($(TEST),coprocessor)
+TOPLEVEL := crypto_coprocessor
+VERILOG_SOURCES := $(CV32_DIR)/rtl/include/cv32e40x_pkg.sv \
+    $(RTL_DIR)/common/rv32_crypto_pkg.sv \
+    $(RTL_DIR)/common/rv32_utils_pkg.sv \
+    $(wildcard $(RTL_DIR)/units/misc/*.sv) \
+    $(wildcard $(RTL_DIR)/units/*.sv) \
+    $(RTL_DIR)/crypto_decoder.sv \
+    $(RTL_DIR)/crypto_controller.sv \
+    $(RTL_DIR)/crypto_datapath.sv \
+    $(RTL_DIR)/crypto_coprocessor.sv
 else
 EXTRA_SOURCES_aes_crypto_unit := units/misc/aes_mixcolumn.sv units/misc/aes_sbox.sv
 EXTRA_SOURCES_shangmi_crypto_unit := units/misc/sm4_sbox.sv
-UNIT_SOURCE := $(if $(filter crypto_decoder,$(TEST)),,units/)$(TEST).sv
+ifeq ($(TEST),decoder)
+TOPLEVEL := crypto_decoder
+UNIT_SOURCE := crypto_decoder.sv
+else
+UNIT_SOURCE := units/$(TEST).sv
+endif
 
 # Packages always appear before the unit that imports them.
 VERILOG_SOURCES := $(addprefix $(RTL_DIR)/, \

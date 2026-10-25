@@ -108,6 +108,7 @@ module crypto_controller import cv32e40x_pkg::*; import rv32_crypto_pkg::*; #(
                 result_rd_o = result_rd_q;
                 result_we_o = 1'b1;
 
+                // todo: also accept new instruction in the future to reduce 1 cycle latency between 2 crypto instructions
                 if (result_valid_i && result_ready_i) begin // hadnshare: result_valid_o && result_ready_i
                     state_d = CONTROLLER_IDLE;
                 end

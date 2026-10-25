@@ -44,7 +44,8 @@ module crypto_coprocessor import rv32_crypto_pkg::*; #(
     // Define the decoder
     crypto_decoder decoder_i (
         .instr_i(issue_instr_i),
-        .rs1_o(), // not used for now
+        /* verilator lint_off PINCONNECTEMPTY */
+        .rs1_o( ), // not used for now
         .rs2_o(rs2),
         .rd_o(rd),
         .aux_o(aux),
