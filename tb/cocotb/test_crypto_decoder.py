@@ -178,6 +178,7 @@ async def check_word(dut, instr, expected_name=None):
         "op_o": op,
         "unit_sel_o": unit,
         "is_illegal_o": int(unit == INVALID),
+        "is_rori_o": int(name == "RORI"),
     }
     for signal, value in expected.items():
         actual = int(getattr(dut, signal).value)

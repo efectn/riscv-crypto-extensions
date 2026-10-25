@@ -100,7 +100,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) bitmap_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[0] & start_unit_i & unit_readies[0]),
+        .valid_i(unit_sel_mux[0] & start_unit_i & unit_readies[0]),
         .ready_o(unit_readies[0]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -117,7 +117,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) clmul_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[1] & start_unit_i & unit_readies[1]),
+        .valid_i(unit_sel_mux[1] & start_unit_i & unit_readies[1]),
         .ready_o(unit_readies[1]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -134,7 +134,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) xperm_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[2] & start_unit_i & unit_readies[2]),
+        .valid_i(unit_sel_mux[2] & start_unit_i & unit_readies[2]),
         .ready_o(unit_readies[2]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -151,7 +151,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) aes_crypto_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[3] & start_unit_i & unit_readies[3]),
+        .valid_i(unit_sel_mux[3] & start_unit_i & unit_readies[3]),
         .ready_o(unit_readies[3]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -168,7 +168,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) shangmi_crypto_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[4] & start_unit_i & unit_readies[4]),
+        .valid_i(unit_sel_mux[4] & start_unit_i & unit_readies[4]),
         .ready_o(unit_readies[4]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -185,7 +185,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) nist_hash_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[5] & start_unit_i & unit_readies[5]),
+        .valid_i(unit_sel_mux[5] & start_unit_i & unit_readies[5]),
         .ready_o(unit_readies[5]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -202,7 +202,7 @@ module crypto_datapath import cv32e40x_pkg::*; #(
     ) shangmi_hash_unit (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
-        .valid_i(unit_sel_q[6] & start_unit_i & unit_readies[6]),
+        .valid_i(unit_sel_mux[6] & start_unit_i & unit_readies[6]),
         .ready_o(unit_readies[6]),
         .op_i(op_mux),
         .rs1_i(rs1_mux),
@@ -213,6 +213,6 @@ module crypto_datapath import cv32e40x_pkg::*; #(
         .result_o(unit_results[6])
     );
 
-    assign unit_ready_o = |(unit_sel_q & unit_readies); // send readiness of selected to controller
+    assign unit_ready_o = |(unit_sel_mux & unit_readies); // send readiness of selected to controller
     assign x_id_o = x_id_q;
 endmodule
