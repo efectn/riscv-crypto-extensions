@@ -65,7 +65,8 @@ This project aims to implement the RISC-V Scalar Cryptography Extension (Zks) in
 - [ ] Integration tests and benchmarks
     - [ ] Testing
         - [ ] Check https://github.com/riscv/riscv-crypto/blob/main/tests/compliance/test-plan-scalar.adoc plan and implement the tests for crypto co-processor
-        - [ ] Derive crypto tests from https://github.com/riscv/riscv-arch-test/tree/act4/tests/rv32i and run Verilator model aganist the golden-reference Spike simulator
+        - [x] Derive crypto tests from https://github.com/riscv/riscv-arch-test/tree/act4/tests/rv32i and run Verilator model aganist the golden-reference Spike simulator
+        - [ ] Implement cryptology algorithms in C using crypto instructions and run aganist test vectors
     - [ ] Benchmarking
         - [ ] Instruction level benchmarks for each crypto instruction
             - [ ] Measure single-instruction latency and throughput for each crypto instruction

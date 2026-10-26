@@ -35,7 +35,7 @@ FW_BUILD := $(BUILD_DIR)/firmware
 FW_NAME := $(basename $(notdir $(APP)))
 FW_ELF := $(FW_BUILD)/$(FW_NAME).elf
 FW_VMEM := $(FW_BUILD)/$(FW_NAME).vmem
-FW_ARCH ?= rv32i_zbkb_zbkc_zbkx_zknd_zkne_zknh_zksed_zksh
+FW_ARCH ?= rv32im_zbkb_zbkc_zbkx_zknd_zkne_zknh_zksed_zksh
 FW_FLAGS := -march=$(FW_ARCH) -mabi=ilp32 -O2 -g -ffreestanding -fno-builtin \
 	-fno-pic -fno-pie -fno-stack-protector -msmall-data-limit=0 \
 	-ffunction-sections -fdata-sections -Wall -Wextra
@@ -103,7 +103,7 @@ SIM_ARGS += --trace --trace-file $(WAVE_FILE)
 endif
 
 .PHONY: all test bitmap nist-hash sm3-hash clmul xperm wave list distclean help cv32e40x-build cv32e40x-run
-.PHONY: firmware firmware-run FORCE
+.PHONY: firmware firmware-run act4 FORCE
 all: test
 
 test:
@@ -138,6 +138,9 @@ firmware-run: MAX_CYCLE = 20000
 firmware-run: firmware
 	$(MAKE) cv32e40x-run VMEM=$(FW_VMEM) MAX_CYCLE=$(MAX_CYCLE)
 
+act4:
+	python3 tb/integration/act4/run.py
+
 wave:
 	@if [ -f $(WAVE_FILE) ]; then gtkwave $(WAVE_FILE); else echo "$(WAVE_FILE) not found. Run: make test TEST=$(TEST) WAVES=1"; fi
 
@@ -149,6 +152,7 @@ list:
 	@echo "  make cv32e40x-run VMEM=program.vmem [TRACE=1] [MEM_SIZE=65536] [MAX_CYCLE=1000]"
 	@echo "  make firmware [APP=software/examples/add.c] [CROSS_COMPILE=riscv64-elf-]"
 	@echo "  make firmware-run [APP=path/to/program.c|.S|.s] [MAX_CYCLE=20000]"
+	@echo "  make act4  # run the M and crypto integration tests"
 
 distclean:
 	rm -rf $(BUILD_DIR) $(WAVE_DIR) sim_build __pycache__ tb/cocotb/__pycache__
@@ -158,7 +162,7 @@ help: list
 
 # The standalone C++ simulator does not require cocotb.
 ifneq ($(strip $(MAKECMDGOALS)),)
-ifeq ($(strip $(filter-out cv32e40x-build cv32e40x-run firmware firmware-run help list,$(MAKECMDGOALS))),)
+ifeq ($(strip $(filter-out cv32e40x-build cv32e40x-run firmware firmware-run act4 help list,$(MAKECMDGOALS))),)
 SKIP_COCOTB := 1
 endif
 endif

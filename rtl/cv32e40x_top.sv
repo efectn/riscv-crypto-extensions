@@ -32,7 +32,7 @@ module cv32e40x_top import cv32e40x_pkg::*; (
     cv32e40x_core #(
         .A_EXT                      (       A_NONE ),
         .B_EXT                      (       B_NONE ),
-        .M_EXT                      (       M_NONE ),
+        .M_EXT                      (            M ),
         .X_EXT                      (            1 ),
         .DEBUG                      (            0 ), // TODO: Not sure about how to deal and use debugging sport. It might be useful or not?
         .DBG_NUM_TRIGGERS           (            0 ),

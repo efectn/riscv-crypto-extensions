@@ -1,3 +1,6 @@
 [submodule "rtl/cv32e40x"]
 	path = rtl/cv32e40x
 	url = https://github.com/openhwfoundation/cv32e40x.git
+[submodule "tb/integration/act4/riscv-arch-tests"]
+	path = tb/integration/act4/riscv-arch-tests
+	url = https://github.com/riscv/riscv-arch-test.git
